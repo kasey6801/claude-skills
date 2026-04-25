@@ -4,6 +4,15 @@ A collection of reusable slash commands for [Claude Code](https://claude.ai/code
 
 ---
 
+## Skills
+
+| Skill | Description |
+|---|---|
+| [`/capture-prompt`](#capture-prompt) | Save, version, and publish LLM prompts to GitHub |
+| [`/book-club`](#book-club) | Personal book club assistant — recommendations, discussions, reading log |
+
+---
+
 ## `/capture-prompt`
 
 Save, version, and publish your favorite LLM prompts as structured Markdown files. The skill guides you through collecting metadata interactively, then writes a formatted file and pushes it to your GitHub repository automatically.
@@ -87,6 +96,56 @@ The skill automatically applies these readability fixes to the Original Prompt f
 - Breaks run-on text into logical paragraphs
 - Formats URL lists as markdown bullets
 - Fixes compound-modifier hyphenation (peer-reviewed, fact-based, AI-generated)
+
+---
+
+## `/book-club`
+
+A conversational literary companion that suggests books, leads discussions calibrated to how far you've read, and remembers your reading history across sessions.
+
+### Installation
+
+```bash
+mkdir -p .claude/commands
+curl -o .claude/commands/book-club.md \
+  https://raw.githubusercontent.com/kasey6801/claude-skills/main/commands/book-club.md
+```
+
+### Usage
+
+In Claude Code, type:
+
+```
+/book-club
+```
+
+Or trigger it naturally with phrases like "what should I read", "I just finished [book]", "book deep dive [title]", or "add to my reading log".
+
+### Features
+
+| Mode | Trigger | Description |
+|---|---|---|
+| Recommend | "what should I read?" | 2–3 picks personalized to your reading history |
+| Discuss | "I'm reading [title]" | Spoiler-safe insights and reading questions |
+| Deep Dive | "book deep dive [title]" | Themes → craft → context → legacy with live scholarly sources |
+| Blow My Mind | "book blow my mind [title]" | The least obvious theory or hidden reading most people miss |
+| Reading Log | "add to my log" | Freeform input, URL support, bulk import |
+| Theme Explore | "explore a theme" | Books across literary fiction, non-fiction, and a wildcard |
+
+### Controls
+
+| Command | Effect |
+|---|---|
+| `book compact` | Shorter responses, fewer lookups |
+| `book full` | Restore full mode |
+| `book no sources` | Skip live web lookups |
+| `book sources on` | Re-enable live lookups |
+| `book no translate` | Suppress translation offers |
+| `book translate on` | Re-enable translation offers |
+
+### Language Support
+
+Sources and responses available in English, French, Spanish, and others on request. Language preference is stored in memory and applied automatically across sessions.
 
 ---
 
