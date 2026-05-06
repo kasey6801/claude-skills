@@ -1,6 +1,6 @@
 # Claude Skills
 
-A collection of reusable slash commands for [Claude Code](https://claude.ai/code).
+A collection of reusable skills and slash commands for [Claude](https://claude.ai/) and [Claude Code](https://claude.ai/code).
 
 ---
 
@@ -10,6 +10,7 @@ A collection of reusable slash commands for [Claude Code](https://claude.ai/code
 |---|---|
 | [`/capture-prompt`](#capture-prompt) | Save, version, and publish LLM prompts to GitHub |
 | [`/book-club`](#book-club) | Personal book club assistant — recommendations, discussions, reading log |
+| [`career-positioning-studio`](#career-positioning-studio) | Generate a four-part career package — LinkedIn update plan, ATS-safe CV, professional development plan, and 10 target-role recommendations |
 
 ---
 
@@ -146,6 +147,90 @@ Or trigger it naturally with phrases like "what should I read", "I just finished
 ### Language Support
 
 Sources and responses available in English, French, Spanish, and others on request. Language preference is stored in memory and applied automatically across sessions.
+
+---
+
+## `career-positioning-studio`
+
+Turn a LinkedIn profile (plus optional website / GitHub / existing CV) into a four-part career package: a LinkedIn update plan, an ATS-safe master CV, a 6–12 month professional development plan, and 10 target-role recommendations with ready-to-paste search queries. Includes a follow-up workflow for iterative refinement.
+
+Unlike the slash-commands above, this is a **bundled skill** — `SKILL.md` plus reference files (`output-templates.md`, `job-sources.md`) — installed as a Claude skill rather than a single-file command.
+
+### Installation
+
+**Option A — Install the packaged `.skill` file** (Cowork, or Claude Code with the skill installer):
+
+```bash
+curl -L -o career-positioning-studio.skill \
+  https://github.com/kasey6801/claude-skills/raw/main/skills/career-positioning-studio.skill
+```
+
+Open the `.skill` file in your Claude client to install.
+
+**Option B — Copy the source folder into a project's `.claude/skills/` directory:**
+
+```bash
+mkdir -p .claude/skills
+git clone --depth 1 https://github.com/kasey6801/claude-skills.git /tmp/cs \
+  && cp -r /tmp/cs/skills/career-positioning-studio .claude/skills/ \
+  && rm -rf /tmp/cs
+```
+
+### Usage
+
+The skill triggers automatically on natural-language openings like:
+
+- "Help me update my LinkedIn"
+- "Write me a new CV / resume"
+- "Build me a professional development plan"
+- "What jobs should I be applying for"
+- "Career package"
+- Pasting a LinkedIn URL or uploading a LinkedIn / résumé PDF in a job-search context
+
+### Inputs
+
+| Input | Required? | Notes |
+|---|---|---|
+| LinkedIn profile content | yes | Pasted text, PDF (read natively), or URL |
+| Personal website / portfolio URL | no | Improves brand context |
+| GitHub URL | no | Engineering signal |
+| Existing CV / résumé | no | Text or PDF |
+| Career-goal Q1 | recommended | Target titles |
+| Career-goal Q2 | recommended | Target industries or employer types |
+| Career-goal Q3 | recommended | Geography, timeline, constraints |
+
+### Outputs
+
+Four standalone Markdown files saved to your workspace folder:
+
+| File | Contents |
+|---|---|
+| `LinkedIn_Update_Plan.md` | New headline (2 options), About section, experience rewrites, top-10 skills, profile-hygiene checklist |
+| `Master_CV.md` | ATS-safe reverse-chronological CV with `[FILL: …]` placeholders for missing data |
+| `Professional_Development_Plan.md` | Tiered certification roadmap, hands-on projects, networking milestones, curated learning resources |
+| `10_Target_Roles.md` | Ten realistic role targets with employer types, fit scores, gap items, and LinkedIn / Indeed search queries |
+
+### Refinement
+
+After delivery, ask follow-up questions or request changes — the skill rewrites only the affected file(s). Examples:
+
+- *"Make the CV more concise"*
+- *"Add a project focused on AI security"*
+- *"Swap target role 3 for something contract-friendly"*
+- *"Why did you recommend that cert?"*
+
+Clarification questions are answered in chat without modifying any files. Change requests rewrite the relevant file(s) and re-save.
+
+### Anti-hallucination guards
+
+- Never invents certifications, employers, dates, or metrics not in the source.
+- Flags missing items with `[FILL: …]` placeholders the candidate must complete before sending.
+- Calibrates claims honestly (e.g., "20+ years cybersecurity" rather than "24 years" if the first four years weren't security-titled).
+- Asks one clarifying question rather than guessing on ambiguous requests.
+
+### Companion artifact
+
+A standalone Cowork HTML artifact version of the same workflow — interactive form, in-browser PDF text extraction, three export formats (`.md` / `.pdf` / `.docx`), and a chat-style refinement panel — runs the same prompts outside this repo. The skill version is leaner because Claude's native tools handle PDF reading, file I/O, and conversation directly.
 
 ---
 
