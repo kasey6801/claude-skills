@@ -1,0 +1,23 @@
+{
+  "skill_name": "pdu-claim-info",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "PDU claim info. Executive summary and evaluate what qualifies as: Ways of Working, Power Skills, Business Acumen.\n\nHere is the video transcript:\n\nThis video covers why 'boring' enterprise tools like Jira and Linear are becoming critical infrastructure for AI agents. The main argument: issue trackers encode durable state, ownership, permissions, audit history, and dependency graphs — exactly what autonomous agents need to coordinate work. The host analyzes Atlassian's MCP server launch, the OpenAI Symphony orchestration spec (which uses Linear as a control plane for coding agents), and why companies like Salesforce, ServiceNow, SAP, and Workday may be repricing as strategic AI substrates. The video provides a five-question diagnostic for evaluating any enterprise tool's agent-readiness: Does it have records? A state machine? Explicit ownership? Structural verbs? Queryable history? It concludes that teams should treat their project management tool choice as an AI infrastructure decision, and that clean work data upstream is a precondition for effective agentic pipelines.",
+      "expected_output": "Executive summary identifying Business Acumen as the primary category (strong) and Ways of Working as secondary (moderate). Power Skills should be rated None or Weak. Practical guidance should include at least two claiming options with specific PDU estimates and a CCRS claiming path.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Where would this video fit for PDUs?\n\nTranscript summary: This video is a 2026 roadmap for becoming a top 2% agentic engineer. The presenter covers: (1) betting on Anthropic's tooling as the best agent harness, (2) why tool calling is the core metric of agent impact, (3) building custom agents with Claude Agent SDK to solve custom business problems, (4) multi-agent orchestration patterns — running 3, 5, 10+ agents in parallel, (5) agent sandboxes as isolated dev environments for safe agentic work, (6) inloop vs. outloop agent coding systems, (7) what 'Agentic Coding 2.0' looks like with a lead agent orchestrating specialized sub-agents, (8) why public benchmarks are becoming saturated and top engineers build private evals, (9) agents eating SaaS UIs, and (10) why AGI hype is a distraction. Central thesis: 2026 is the year of trust — trust equals speed, speed equals iteration, iteration equals impact.",
+      "expected_output": "Executive summary identifying Ways of Working as the primary category (strong) and Business Acumen as a secondary category (moderate). Power Skills should be rated None or Weak. Practical guidance with at least two options and specific PDU/CCRS guidance.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "What qualifies as Business Acumen for PDU claims? I hold a PMP and a PMI-ACP.",
+      "expected_output": "A clear explanation of the Business Acumen category — what qualifies, with concrete examples. Should be tailored to someone holding both PMP and PMI-ACP (mentioning that 8 PDUs minimum are needed in Business Acumen for PMP, 4 for PMI-ACP). Should include examples relevant to a professional context. Includes resources and APA citations.",
+      "files": []
+    }
+  ]
+}
