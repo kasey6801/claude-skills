@@ -9,6 +9,7 @@ A collection of reusable skills and slash commands for [Claude](https://claude.a
 | Skill | Description |
 |---|---|
 | [`/capture-prompt`](#capture-prompt) | Save, version, and publish LLM prompts to GitHub |
+| [`pdu-claim-info`](#pdu-claim-info) | Evaluate any learning content against PMI Talent Triangle categories and produce PDU claim options with CCRS guidance |
 | [`/book-club`](#book-club) | Personal book club assistant — recommendations, discussions, reading log |
 | [`career-positioning-studio`](#career-positioning-studio) | Generate a four-part career package — LinkedIn update plan, ATS-safe CV, professional development plan, and 10 target-role recommendations |
 
@@ -237,3 +238,88 @@ A standalone Cowork HTML artifact version of the same workflow — interactive f
 ## License
 
 MIT
+
+---
+
+## `pdu-claim-info`
+
+Evaluate any professional learning content against the three PMI Talent Triangle categories (Ways of Working, Power Skills, Business Acumen) and receive a PDU claim analysis with executive summary, category strength ratings, and exactly three claiming options using the standard 0.25 / 0.5 / 0.75 / 1.0 PDU scale.
+
+On first run the skill fetches the live PMI CCR handbook and saves it to memory. It prompts you to refresh once per calendar year, and uses a four-attempt URL resilience sequence if the primary link is unavailable.
+
+### Installation
+
+**Option A — Install the packaged `.skill` file** (Cowork, or Claude Code with the skill installer):
+
+```bash
+curl -L -o pdu-claim-info.skill \
+  https://github.com/kasey6801/claude-skills/raw/main/skills/pdu-claim-info.skill
+```
+
+Open the `.skill` file in your Claude client to install.
+
+**Option B — Copy the source folder into a project's `.claude/skills/` directory:**
+
+```bash
+mkdir -p .claude/skills
+git clone --depth 1 https://github.com/kasey6801/claude-skills.git /tmp/cs \
+  && cp -r /tmp/cs/skills/pdu-claim-info .claude/skills/ \
+  && rm -rf /tmp/cs
+```
+
+### Usage
+
+The skill triggers automatically when you submit any learning content, or when you ask:
+
+- "Where does this fit for PDUs?"
+- "Can I claim PDUs for this?"
+- "What qualifies as Business Acumen / Ways of Working / Power Skills?"
+- Paste a video transcript, article, podcast summary, course description, or conference session notes
+
+No explicit PDU question needed — submitting content is the trigger.
+
+### Supported Content Types
+
+| Format | Example |
+|---|---|
+| Video transcript | Paste the full or summarized transcript |
+| Article or blog post | Paste the text or provide the URL |
+| Course description | Module outline, syllabus, or course page |
+| Podcast summary | Episode notes or summary text |
+| Conference session | Session abstract or notes |
+| Book chapter | Chapter summary or pasted excerpt |
+
+### Output Structure
+
+Every analysis produces:
+
+| Section | Contents |
+|---|---|
+| Executive Summary | 2-3 sentences: content overview and primary PDU verdict |
+| Ways of Working | Strength rating (Strong / Moderate / Weak / None) with justification |
+| Power Skills | Strength rating with justification |
+| Business Acumen | Strength rating with justification |
+| Practical Claiming Guidance | 3 options with PDU value (0.25 / 0.5 / 0.75 / 1.0), category split, and CCRS path |
+| Resources to Learn More | PMI CCR Handbook, CCRS portal, and content-specific links |
+| Citations | APA-formatted references for the content and PMI sources |
+
+### PDU Reference
+
+| Certification | Cycle | Total PDUs | Min Each Category |
+|---|---|---|---|
+| PMP | 3 years | 60 | 8 |
+| PMI-ACP | 3 years | 30 | 4 |
+
+Power Skills and Business Acumen PDUs apply to both PMP and PMI-ACP simultaneously.
+
+### Live Handbook Sync
+
+On first run the skill fetches the PMI CCR handbook from two official sources and saves the extracted requirements to memory. It uses a four-attempt resilience sequence if the primary URL is unavailable:
+
+1. Direct PDF URL (primary)
+2. Maintain Your Certification page
+3. Targeted web search on pmi.org
+4. Broader web search across recognized PM sources
+
+If all four attempts fail, the skill proceeds with stored or built-in defaults and tells you the date of the last successful fetch.
+
