@@ -272,6 +272,26 @@ If full citation details are not available from the content provided, note the f
 
 ---
 
+## Knowledge Asset Offer
+
+After delivering the full analysis (all sections through Citations), always ask the following — phrased as a single, concise question:
+
+> "Would you like to save this as a knowledge asset for later reference? If so, choose a format:
+> 1. Infographic — a visual one-pager summarizing the PDU breakdown and claim options
+> 2. Report — a structured written document with all sections
+> 3. Presentation — up to 3 slides covering the key takeaways
+>
+> And which file type?
+> A. Markdown (.md)
+> B. PDF (.pdf)
+> C. PowerPoint (.pptx)"
+
+Wait for the user's response before generating anything. Do not default or assume a choice.
+
+Once the user responds, generate the chosen asset using the **Knowledge Asset Generation** instructions below. If the user declines or does not respond with a selection, do not generate an asset.
+
+---
+
 ## How to Evaluate Content
 
 1. **Read the full content provided.** This could be a video transcript, article, course description, podcast summary, conference session notes, book chapter, or any other format. Do not skim; the category mapping depends on what the content actually covers, not what its title implies. If the format is unclear, note your assumption.
@@ -297,3 +317,51 @@ If the user asks "what qualifies as Ways of Working?" or "what counts for Busine
 3. **Examples relevant to the user's background:** tailor to their role/industry if known
 4. **Practical guidance:** how to find qualifying content, how to claim
 5. **Resources** and **Citations**
+
+Then follow the same **Knowledge Asset Offer** prompt above.
+
+---
+
+## Knowledge Asset Generation
+
+Generate the asset the user selected. Use the content from the just-completed analysis as the source of truth. Do not add new analysis; distill and reformat only.
+
+### Format Rules by Asset Type
+
+**Infographic (.md, .pdf, or .pptx)**
+A compact visual one-pager. Include:
+- Content title and date
+- PDU Breakdown: a simple table or visual showing category strengths (Strong / Moderate / Weak / None) and recommended PDU allocation
+- Top claiming option (the one that best fits the user's cert profile)
+- CCRS path: Education -> Self-Directed Learning
+- One-line each for Ways of Working, Power Skills, Business Acumen verdicts
+- Keep text minimal; favor labels, values, and short phrases over prose
+
+**Report (.md, .pdf, or .pptx)**
+A structured written document. Include all sections from the Output Format in full:
+- Executive Summary
+- Ways of Working (with strength rating and justification)
+- Power Skills (with strength rating and justification)
+- Business Acumen (with strength rating and justification)
+- Practical Claiming Guidance (all 3 options)
+- Resources to Learn More
+- Citations (APA)
+
+**Presentation (.md, .pdf, or .pptx)**
+Maximum 3 slides. Use this structure:
+- Slide 1: Title + Executive Summary (content name, PDU verdict in one sentence, primary category)
+- Slide 2: PDU Breakdown (table or visual: category, strength, recommended PDUs; plus top claiming option)
+- Slide 3: Next Steps (CCRS claim path, any reflection note recommendation, key resource links)
+
+### File Type Instructions
+
+**Markdown (.md)**
+Write the asset as a clean Markdown document. Use headers, tables, and minimal prose. Save to the workspace folder.
+
+**PDF (.pdf)**
+Read the pdf SKILL.md before building. Generate the asset as a well-formatted PDF. Save to the workspace folder.
+
+**PowerPoint (.pptx)**
+Read the pptx SKILL.md before building. Create the presentation with no more than 3 slides. Save to the workspace folder.
+
+After generating the file, provide a direct link to it in the workspace folder.
