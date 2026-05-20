@@ -11,7 +11,8 @@ description: >
 
 # Project Process Skill
 
-This skill implements the Project Process Guide workflow for setting up and maintaining structured software projects.
+This skill implements the workflow from the Project Process Guide stored at
+`/Users/kcharles/ClaudeDev/3. Resources/Project Process Guide.md`.
 
 When invoked, ask the user which mode they need:
 
@@ -78,11 +79,76 @@ End every response with: CHANGE_LOG.md updated -- last entry: [N]
 ```
 
 ### Step 3: Create archive documents
-Create these empty files inside `_archive/`:
+Create these files inside `_archive/`:
+
 - `CHANGE_LOG.md` with header: `# [Project Name] -- Change Log` and `*Append new entries below this line.*`
 - `BUILD_OVERVIEW.md` with header: `# [Project Name] -- Build Overview` and `**Last updated:** [today's date]`
 - `[ProjectName] Backlog.md` with the standard priority sections: P0, P1, P2, P3, and Completed
 - `QC.md` with header: `# [Project Name] -- QC Log`
+- `EFFORT_INVESTMENT.md` with the following starter content:
+
+```markdown
+# [Project Name] -- Effort Investment Summary
+
+**Prepared:** [today's date]
+**Scope:** [Project description -- update as the project progresses]
+
+---
+
+## Executive Summary
+
+| Measure | Value |
+|---------|-------|
+| AI-assisted session time | TBD |
+| Equivalent human developer effort (no AI) | TBD |
+| Logged changes | 0 |
+| Calendar days | 0 |
+| Files delivered | TBD |
+
+---
+
+## Effort Breakdown
+
+| Work Category | Entries | Est. Hours | Description |
+|---------------|---------|-----------|-------------|
+| Initial setup | [001]--[00N] | [X] h | Project scaffold, CLAUDE.md, archive docs, exclusions, version control |
+
+---
+
+## Learning Opportunities
+
+*To be documented at project milestones or completion.*
+
+---
+
+## Output Delivered
+
+*To be documented at project milestones or completion.*
+```
+
+- `CLAUDE_SECURITY_REVIEW.md` with the following starter content:
+
+```markdown
+# Security Review -- [Project Name]
+
+**Reviewed:** [date of first review -- update on each review]
+**Branch:** `main`
+**Reviewer:** Claude (automated security analysis)
+
+---
+
+## No security review has been completed yet.
+
+Run a review by typing: *"Run a security review of this project"* or use the `/security-review` slash command.
+
+All findings at or above 8/10 confidence are reported and logged below. Findings below 8/10 are false positives and are dismissed with reasoning.
+
+---
+
+## Reviews
+
+*Append each completed review here with date, branch, and findings.*
+```
 
 ### Step 4: Create .env
 Create `.env` at the project root with:
@@ -142,7 +208,7 @@ After all steps, confirm:
 
 Ask: *"What is the requested change or feature?"*
 
-Then ask: *"What priority? P0 (critical -- blocking usage), P1 (high -- significant problem), P2 (medium -- improvement), or P3 (low -- nice-to-have)?"*
+Then ask: *"What priority? P0 (critical -- blocking usage or data loss), P1 (high -- significant problem or missing core feature), P2 (medium -- improvement), or P3 (low -- nice-to-have)?"*
 
 Format the entry using the next available BL-N number (read the backlog file to find the current highest number and increment by 1):
 
@@ -156,6 +222,8 @@ Format the entry using the next available BL-N number (read the backlog file to 
 ```
 
 Append the entry under the correct priority section in `_archive/[ProjectName] Backlog.md`.
+
+When an item is implemented, move it from its priority section to a **Completed** section at the bottom of the backlog file, noting the CHANGE_LOG entry number.
 
 Confirm: *"BL-[N] added to the backlog at P[priority]."*
 
@@ -208,6 +276,12 @@ These rules apply throughout every session using this skill:
 
 **Files never pushed to GitHub:** `_archive/`, `RELEASE/`, `CLAUDE.md`, `.env`, `node_modules/`, `*.zip`, `.DS_Store`
 
+**Before pushing to GitHub:**
+1. Security review: Ask *"Would you like to run a security review before this push?"* If yes, run the `/security-review` slash command (or ask Claude to run one). Log all findings at or above 8/10 confidence in `_archive/CLAUDE_SECURITY_REVIEW.md`. Dismiss findings below 8/10 with brief reasoning.
+2. Effort logging: Ask *"Would you like to update EFFORT_INVESTMENT.md before pushing?"* If yes, collect approximate session time, number of CHANGE_LOG entries made this session, and what was delivered. Update the Executive Summary totals and append a new row to the Effort Breakdown table.
+
 **Documentation updates:** After every task, check which archive documents need updating and prompt the user. Never update silently.
+
+**When to run a QC check:** Run Mode C proactively when a significant phase completes, naming or terminology changes occur, dead code is suspected, or a security concern arises -- not only when the user explicitly asks.
 
 **Version numbers:** When a version number changes, update every file where it appears. Run `npm install` after updating `package.json`. Confirm all locations are in sync before pushing.
