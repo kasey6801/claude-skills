@@ -12,6 +12,7 @@ A collection of reusable skills and slash commands for [Claude](https://claude.a
 | [`pdu-claim-info`](#pdu-claim-info) | Evaluate any learning content against PMI Talent Triangle categories and produce PDU claim options with CCRS guidance |
 | [`/book-club`](#book-club) | Personal book club assistant — recommendations, discussions, reading log |
 | [`career-positioning-studio`](#career-positioning-studio) | Generate a four-part career package — LinkedIn update plan, ATS-safe CV, professional development plan, and 10 target-role recommendations |
+| [`/new-project`](#new-project) | Set up a new software project, manage a prioritised backlog, or run a QC audit |
 
 ---
 
@@ -234,6 +235,65 @@ Clarification questions are answered in chat without modifying any files. Change
 A standalone Cowork HTML artifact version of the same workflow — interactive form, in-browser PDF text extraction, three export formats (`.md` / `.pdf` / `.docx`), and a chat-style refinement panel — runs the same prompts outside this repo. The skill version is leaner because Claude's native tools handle PDF reading, file I/O, and conversation directly.
 
 ---
+
+
+---
+
+## `/new-project`
+
+Guide Claude through setting up a new software project from scratch, adding items to a structured backlog, or running a QC audit of an existing project.
+
+### Installation
+
+**Global install** (available in every Claude Code project on this machine):
+
+```bash
+mkdir -p ~/.claude/commands
+curl -o ~/.claude/commands/new-project.md \
+  https://raw.githubusercontent.com/kasey6801/claude-skills/main/skills/new-project.md
+```
+
+**Project-level install** (available only in the current project):
+
+```bash
+mkdir -p .claude/commands
+curl -o .claude/commands/new-project.md \
+  https://raw.githubusercontent.com/kasey6801/claude-skills/main/skills/new-project.md
+```
+
+### Usage
+
+In Claude Code, type:
+
+```
+/new-project
+```
+
+Claude will ask which mode you need:
+
+```
+A -- Set up a new project
+B -- Add an item to the backlog
+C -- Run a QC check
+```
+
+### Modes
+
+| Mode | What it does |
+|---|---|
+| **A -- New project** | Creates the project root, `_archive/` and `RELEASE/` folders, `CLAUDE.md`, archive documents (`CHANGE_LOG.md`, `BUILD_OVERVIEW.md`, backlog file, `QC.md`), `.env`, and exclusions file. Optionally initialises git and creates a GitHub repository. |
+| **B -- Add to backlog** | Collects the request and priority (P0 critical / P1 high / P2 medium / P3 low), then appends a formatted `BL-N` entry to the project backlog file. |
+| **C -- QC check** | Checks for consistency issues, dead code, stale references, or security problems, and logs findings to `_archive/QC.md` with `QC-N` numbering. |
+
+### Standing rules
+
+These apply throughout every session regardless of mode:
+
+- Before any change: ask implement-now or add-to-backlog
+- After every task: update `CHANGE_LOG.md` and confirm the entry number
+- Credentials: never paste tokens into chat -- store in `.env` and reference as `$VARIABLE_NAME`
+- Archive before deleting: copy to `_archive/` first, then remove, then log
+- Timestamps: update the `**Last updated:**` header on every file touched
 
 ## License
 
