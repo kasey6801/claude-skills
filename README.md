@@ -164,7 +164,7 @@ Unlike the slash-commands above, this is a **bundled skill** — `SKILL.md` plus
 
 ```bash
 curl -L -o career-positioning-studio.skill \
-  https://github.com/kasey6801/claude-skills/raw/main/skills/career-positioning-studio.skill
+  https://github.com/kasey6801/claude-skills/raw/main/skills/dist/career-positioning-studio.skill
 ```
 
 Open the `.skill` file in your Claude client to install.
@@ -250,7 +250,7 @@ Guide Claude through setting up a new software project from scratch, adding item
 ```bash
 mkdir -p ~/.claude/commands
 curl -o ~/.claude/commands/new-project.md \
-  https://raw.githubusercontent.com/kasey6801/claude-skills/main/skills/new-project.md
+  https://raw.githubusercontent.com/kasey6801/claude-skills/main/commands/new-project.md
 ```
 
 **Project-level install** (available only in the current project):
@@ -258,7 +258,7 @@ curl -o ~/.claude/commands/new-project.md \
 ```bash
 mkdir -p .claude/commands
 curl -o .claude/commands/new-project.md \
-  https://raw.githubusercontent.com/kasey6801/claude-skills/main/skills/new-project.md
+  https://raw.githubusercontent.com/kasey6801/claude-skills/main/commands/new-project.md
 ```
 
 ### Usage
@@ -313,7 +313,7 @@ On first run the skill fetches the live PMI CCR handbook and saves it to memory.
 
 ```bash
 curl -L -o pdu-claim-info.skill \
-  https://github.com/kasey6801/claude-skills/raw/main/skills/pdu-claim-info.skill
+  https://github.com/kasey6801/claude-skills/raw/main/skills/dist/pdu-claim-info.skill
 ```
 
 Open the `.skill` file in your Claude client to install.

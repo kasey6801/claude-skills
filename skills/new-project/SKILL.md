@@ -1,4 +1,5 @@
 ---
+name: new-project
 description: >
   Guides the user through setting up a new software project following the Project
   Process Guide (v1.2), or assists with ongoing project workflows including backlog
