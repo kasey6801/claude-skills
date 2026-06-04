@@ -16,6 +16,67 @@ A collection of reusable skills and slash commands for [Claude](https://claude.a
 
 ---
 
+## Installation
+
+This repo ships two kinds of extension, installed in two different places:
+
+- **Skills** live in a **folder** (`skills/<name>/` containing `SKILL.md` plus optional `references/`, `evals/`). They install into a `.claude/skills/` directory and auto-trigger when your request matches their description.
+- **Commands** are a **single `.md` file** (`commands/<name>.md`). They install into a `.claude/commands/` directory and are invoked explicitly with `/<name>`.
+
+In both cases, install **globally** (available in every project on your machine) by targeting `~/.claude/...`, or **per-project** by targeting `.claude/...` from the project root. The per-skill / per-command sections below give the exact name to drop in.
+
+### Installing a skill
+
+Skills in this repo: `career-positioning-studio`, `pdu-claim-info`, `new-project`.
+
+**Option A — Packaged `.skill` bundle** (a single zip per skill, in [`skills/dist/`](skills/dist/)). Download it and open it in your Claude client, or unzip it into a skills directory:
+
+```bash
+# Global install (every project on this machine)
+mkdir -p ~/.claude/skills
+curl -L -o /tmp/<skill-name>.skill \
+  https://github.com/kasey6801/claude-skills/raw/main/skills/dist/<skill-name>.skill
+unzip /tmp/<skill-name>.skill -d ~/.claude/skills/
+```
+
+**Option B — Copy the source folder** into a project's `.claude/skills/`:
+
+```bash
+# Project-level install (current project only)
+mkdir -p .claude/skills
+git clone --depth 1 https://github.com/kasey6801/claude-skills.git /tmp/cs \
+  && cp -r /tmp/cs/skills/<skill-name> .claude/skills/ \
+  && rm -rf /tmp/cs
+```
+
+Either way the skill ends up at `.claude/skills/<skill-name>/SKILL.md`. Replace `<skill-name>` with one of the skills listed above.
+
+> **Maintainers:** after editing any `skills/<name>/` folder, regenerate the bundles with [`scripts/package-skills.sh`](scripts/package-skills.sh) so `skills/dist/*.skill` stays in sync.
+
+### Installing a command
+
+Commands in this repo: `capture-prompt`, `book-club`, `new-project`.
+
+Download the single `.md` file straight into a commands directory:
+
+```bash
+# Global install (every project on this machine)
+mkdir -p ~/.claude/commands
+curl -o ~/.claude/commands/<command-name>.md \
+  https://raw.githubusercontent.com/kasey6801/claude-skills/main/commands/<command-name>.md
+```
+
+```bash
+# Project-level install (current project only)
+mkdir -p .claude/commands
+curl -o .claude/commands/<command-name>.md \
+  https://raw.githubusercontent.com/kasey6801/claude-skills/main/commands/<command-name>.md
+```
+
+The command is then available as `/<command-name>`. Replace `<command-name>` with one of the commands listed above.
+
+---
+
 ## `/capture-prompt`
 
 Save, version, and publish your favorite LLM prompts as structured Markdown files. The skill guides you through collecting metadata interactively, then writes a formatted file and pushes it to your GitHub repository automatically.
