@@ -240,8 +240,8 @@ Ask: *"Do you want to create a GitHub repository for this project?"*
 If yes:
 - Ask: *"What should the repository be named?"*
 - Ask: *"Public or private?"*
-- Use `$GITHUB_TOKEN` from `.env` to call the GitHub API and create the repository
-- Connect the local project to the remote
+- Use `$GITHUB_TOKEN` from `.env` to call the GitHub API and create the repository (this is an API call — the token is read from `.env`, never pasted into chat)
+- Connect the local project to the remote with a **clean HTTPS URL** (`https://github.com/<owner>/<repo>.git`) — no token in the URL. Git pushes/pulls authenticate via the `gh` credential helper (keychain), so no token is needed for transport.
 - Never ask the user to paste the token into chat
 
 ### Completion
@@ -396,7 +396,9 @@ These rules apply throughout every session using this skill:
 
 **Timestamps:** Update the `**Last updated:**` header on every file touched.
 
-**Credentials:** Never ask the user to paste a token into chat. Reference `$VARIABLE_NAME` from `.env`. After pushing with a token-embedded git URL, immediately restore the clean HTTPS remote URL.
+**Credentials:** Never ask the user to paste a token into chat. Reference `$VARIABLE_NAME` from `.env`. Never embed a token in a git remote URL — use a clean HTTPS remote; git transport is authenticated by the `gh` credential helper (keychain).
+
+**GitHub authentication (starting a new project):** Use a clean HTTPS remote for git — authentication is handled automatically by the `gh` credential helper (no token in the URL). Add a fine-grained, gitignored `.env` token only if the project's own code calls the GitHub API.
 
 **Archiving before deleting:** Copy to `_archive/` first. Then delete. Then log in CHANGE_LOG.md. Never edit files inside `_archive/`.
 
