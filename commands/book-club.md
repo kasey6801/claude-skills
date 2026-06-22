@@ -8,7 +8,8 @@ description: >
   "book deep dive [title]" (structured analysis), "book blow my mind [title]" (hidden theories),
   "add to my reading log", "I've already read", "log some books", "build my reading history",
   "what should I read next" when reading history is in memory, "summarize this article: <url>" /
-  "log this article", and "log our discussion" / "save this discussion". DO NOT trigger:
+  "log this article", "log our discussion" / "save this discussion", and "create my reading log" /
+  "set up my reading log" / "build my reading log page". DO NOT trigger:
   "deep dive" or "blow my mind" without a book/author reference; general author research without
   reading intent; academic citation or bibliography tasks only.
 ---
@@ -16,7 +17,39 @@ description: >
 # Book Club Skill
 
 A conversational literary companion that suggests books, discusses them at the right depth, and
-remembers what you've read. Works across Claude Chat and Claude Cowork.
+remembers what you've read. Works across Claude Chat and Claude Cowork. It also keeps a **Reading
+Log** — a single self-contained HTML page (`index.html`) the skill can create for you and keeps in
+sync with memory as you log books, articles, and discussions.
+
+---
+
+## Setting Up Your Reading Log
+
+Everything below works from this skill alone — no other files needed. A clean way to run it day to
+day:
+
+1. **Make a Project (recommended).** In Claude, create a new Project — call it "Book Club" or
+   "Reading Log." A Project has its own separate memory, so your reading history accumulates in one
+   place and stays out of unrelated chats. That's what keeps the log coherent over time. (You can
+   also use the skill in a plain chat; a Project just gives memory somewhere durable to live.)
+
+2. **Add this skill.**
+   - **Claude Chat / a Project**: paste this skill's full contents into the Project's custom
+     instructions, or add the file to the Project's knowledge, so every chat in the Project follows
+     the book-club workflow.
+   - **Claude Code**: it installs as the `/book-club` slash command.
+
+3. **Create the empty log.** Just ask — "create my reading log" (or "set up my reading log") — and
+   the skill builds an empty `index.html` artifact for you. You don't have to paste a build prompt;
+   the full build spec is embedded in *Creating the Reading Log* below. If you skip this step, the
+   skill auto-creates the log the first time you log something.
+
+4. **Start logging.** Tell the book club what you've read — "I finished [title]", "log some books",
+   "summarize this article: <url>", "log our discussion." Each entry is saved to memory **and**
+   written into the log artifact in the same turn (see *Writing to the Reading Log File*).
+
+Because the page is generated from memory, it's always reproducible — if the file is ever lost, the
+skill rebuilds it from your saved history.
 
 ---
 
@@ -79,9 +112,11 @@ Present the following in full:
 >
 > **📄 The Reading Log page**
 > Your history also lives in a single self-contained HTML page (`index.html`) — filterable by
-> type, author, theme, and discipline. Every entry I confirm is written to memory **and** appended
-> to that page in the same step, so logging a book *is* updating the log. See *Writing to the
-> Reading Log File* below.
+> type, author, theme, and discipline. Say "create my reading log" and I'll build it for you (or
+> I'll create it automatically the first time you log something). Every entry I confirm is then
+> written to memory **and** appended to that page in the same step, so logging a book *is* updating
+> the log. You can publish it as a shareable web page too. See *Setting Up Your Reading Log*,
+> *Creating the Reading Log*, and *Publishing and Sharing the Log*.
 >
 > ---
 >
@@ -456,6 +491,112 @@ Use the reading log to proactively personalize future recommendations without be
 
 ---
 
+## Creating the Reading Log
+
+The Reading Log is a single self-contained HTML page (`index.html`). The skill creates it from the
+build spec below — you never have to supply one.
+
+**When to create it.**
+- **On request** — "create my reading log", "set up my reading log", "build my reading log page":
+  build the empty page from the spec and present it.
+- **Auto-create fallback** — when a confirmed entry needs to be written (see *Writing to the
+  Reading Log File*) and no Reading Log artifact/file exists yet, build the empty page first, then
+  append the entry in the same turn.
+- **Regenerate** — if the page is lost or drifts from memory, rebuild it from this same spec, then
+  re-append every entry from `book_club_log` memory (memory is canonical).
+
+**Build spec** (build exactly this; it produces an *empty* log ready to receive entries). The
+`ENTRY FORMAT` here is the same `DATA` schema and the same 14-term discipline list used in
+*Writing to the Reading Log File* and *Memory Logging* — keep all three consistent; do not create
+a second, diverging copy.
+
+```text
+Build a single self-contained interactive HTML reading log, delivered as one
+file (index.html), then run two rounds of QA on it.
+
+START EMPTY. The log holds no entries yet — initialize it with an empty data
+array (`const DATA = [];`) so the user can start logging their own books,
+articles, and discussions. When there are no entries, show a friendly empty-state
+message; the controls should still render, and the facets should populate
+automatically as entries are added.
+
+ENTRY FORMAT. Every entry added later is one object in the `DATA` array, grouped
+by type, with these fields:
+- type: "book" | "article" | "discussion"
+- title
+- author: the person (books/articles); for discussions a short descriptor such
+  as "on Le Guin" or "cross-work: A · B"
+- source: publication (articles) or "Discussion" (discussions); omit for books
+- year: publication year (books/articles); omit for discussions
+- added: ISO date "YYYY-MM-DD"
+- status: "done" or "next" (books), "art" (articles), "disc" (discussions)
+- series: e.g. "Hainish Cycle · 6", "Discworld · 1", or ""
+- link: Open Library *work* page for books and discussions; the article's own
+  URL for articles
+- linkLabel: discussions only — the subject book's title
+- summary: 1–3 sentences
+- disciplines: array drawn ONLY from this fixed 14-term list — macro economics,
+  micro economics, sociology, anthropology, engineering, statistics, finance,
+  marketing, accounting, physics, chemistry, computer science, software
+  engineering, communication — tagged only where clearly applicable
+- themes: 2–4 free-text tags
+- note: optional; omit if none
+
+FEATURES.
+- Type filter bar: All / Books / Articles / Discussions.
+- Multi-select facet dropdowns for Authors, Themes, and Disciplines: compact
+  trigger plus a floating checkbox panel, per-option counts, OR within a facet
+  and AND across facets. Authors and Themes are derived from the logged entries;
+  Disciplines always lists the fixed 14 terms, with any that have no entries
+  shown disabled.
+- Search box matching title, author, source, and tags.
+- Dates control with a basis toggle (Added ⇄ Published) and a period selector
+  that adapts to the basis: for Added, All time / per-month buckets / a custom
+  from–to date range; for Published, from-year and to-year selects. Build both
+  period UIs once and just show/hide them so nothing reflows.
+- Sort: Grouped (by type, default), Newest, Oldest — on whichever date basis is
+  active. Entries with no publication date (e.g. discussions) collect in a
+  "No publication date" group at the end under Published + sorted.
+- Dark-mode toggle that defaults to the system setting and is session-only (no
+  storage).
+- Collapsible entries, each with a colored left edge by type, a status chip, and
+  a meta line (byline · added date · source link).
+- A bordered container, sticky controls, responsive down to two columns then one
+  on narrow screens.
+- A "Last updated [date]" line near the top of the page.
+
+CONSTRAINTS.
+- One file, fully self-contained: all CSS and JS inline, system fonts only, no
+  external assets or network calls at runtime, so it works offline.
+- All theme colors via CSS variables, including a `--prose` token for body text
+  so dark mode has no hardcoded colors.
+- No localStorage, sessionStorage, eval, Function, or document.write. Build the
+  list markup from the static DATA only; never insert the search value into the
+  DOM.
+
+QA — RUN TWO ROUNDS, fixing what you find and re-verifying after each change:
+- Round 1 (correctness + hygiene): syntax-check the script with `node --check`;
+  confirm DATA is a valid (empty) array and the empty-state renders; remove any
+  unused CSS or JS; confirm no hardcoded text colors survive in dark mode (body
+  prose uses `--prose`); confirm the type tally is computed once, not inside the
+  render loop; security scan — no storage/eval, rel="noopener noreferrer" on
+  external links, user input never reaches innerHTML.
+- Round 2 (polish + accessibility): re-scan for unused selectors or identifiers
+  introduced by the round-1 edits; make the expand/collapse control's aria-label
+  flip between "Expand entry" and "Collapse entry" with aria-expanded kept in
+  sync; drop any redundant rules (e.g. an explicit [hidden]{display:none} that
+  the global hidden attribute already handles); re-run the syntax checks before
+  presenting.
+
+FINALIZE. Set both the <title> and the on-page <h1> to "Reading Log". Name the
+file index.html (the root file GitHub Pages serves). Present the final file.
+```
+
+After building, confirm with the user and move straight into logging (or, in the auto-create case,
+append the pending entry).
+
+---
+
 ## Writing to the Reading Log File
 
 Every confirmed entry is written to **both** memory **and** the Reading Log page in the same turn
@@ -551,8 +692,40 @@ Writes to memory  -->  Appends the object to DATA[] in index.html
 ### Repair path
 
 If the HTML file is ever lost or drifts out of sync with memory, regenerate the whole log from
-memory from scratch — because memory holds the canonical record (the full `book_club_log` schema),
-the rendered page is always reproducible.
+scratch using the build spec in *Creating the Reading Log*, then re-append every entry from
+`book_club_log` memory — because memory holds the canonical record (the full `book_club_log`
+schema), the rendered page is always reproducible.
+
+---
+
+## Publishing and Sharing the Log
+
+The Reading Log opens as an **artifact** — a self-contained page in its own panel beside the chat.
+Each edit updates it in place as a new version. To share it:
+
+**Publish a public page** (Free / Pro / Max plans):
+1. Open the reading-log artifact in its side panel.
+2. Make sure you're on the version you want to share.
+3. Click **Publish** (top-right of the artifact panel).
+4. Copy the public link.
+
+Anyone with the link can use the filters, search, and dark mode without a Claude account; they're
+only asked to sign in if they want to **Customize** (remix) it into their own independent copy.
+Published links don't expire and can be indexed by search engines. Two cautions: sharing an
+artifact also exposes the files/attachments in the conversation that created it (mind any personal
+notes), and on Team/Enterprise plans artifacts are shareable only within the organization.
+
+**A published page is a frozen snapshot.** Entries are baked into the file and a published artifact
+runs sandboxed with no network access — it does not pull in new books on its own. So when you log
+more later, the new entries update the artifact **version in your chat**, but the already-published
+link keeps showing the old snapshot. To share the new entries, refresh the log, then **publish the
+updated version** and share that link.
+
+**Want one stable URL you update in place?** Use **GitHub Pages** instead: replace `index.html` in
+the repo with the refreshed log and the same URL redeploys. The trade-off is snapshot-per-version
+(Claude publish) vs. update-in-place at a fixed URL (GitHub Pages). (The "updates at the same URL
+automatically" behavior some mention is a separate Claude Code Artifacts feature for Team/Enterprise
+orgs, not how a published consumer artifact behaves.)
 
 ---
 
