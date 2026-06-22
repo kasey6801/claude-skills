@@ -606,7 +606,23 @@ source of truth; the HTML page is its visible view, and neither is written witho
 **The file.** The log is a single self-contained HTML page, `index.html`. Its entries live in a
 JavaScript array near the bottom of the file: `const DATA = [ … ];`. In Claude Chat / a Project
 this is the reading-log **artifact** in the conversation; in Claude Code it is the file on disk in
-the project. Append to that `DATA` array — do not rebuild the file.
+the project.
+
+**Source of truth — never fetch the log from anywhere.** The skill is fully self-contained: the
+only inputs are **memory** (the canonical `book_club_log` record) and **the artifact/file present
+in the current conversation or project**. Do **not** retrieve the log from GitHub, GitHub Pages,
+the published artifact URL, or any other external location — even though `index.html` may also be
+hosted there. A published/GitHub copy is **output only**, never an input; treating it as a source
+risks pulling a stale snapshot, and the live URL isn't reliably fetchable anyway.
+
+**Which path to take on each entry:**
+- **If the reading-log file/artifact is already present in this conversation/project** → append to
+  its `DATA` array in place; do not rebuild it.
+- **If it is *not* present** (e.g. a brand-new chat where the prior artifact didn't carry over) →
+  **regenerate it from memory** using the build spec in *Creating the Reading Log* (re-add every
+  entry from `book_club_log`), then append the new entry. Do **not** go looking for the previous
+  file to download — rebuilding from memory *is* the intended behavior, and it's lossless because
+  memory holds every field.
 
 **The trigger.** Any confirmed entry in the normal course of using the skill — finishing a book
 ("I finished *The Telling*"), a bulk "log some books" import, "summarize this article: <url>", or
