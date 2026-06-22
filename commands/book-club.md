@@ -462,11 +462,10 @@ Every confirmed entry is written to **both** memory **and** the Reading Log page
 — logging a book (or article, or discussion) *is* updating the log. Memory stays the durable
 source of truth; the HTML page is its visible view, and neither is written without the other.
 
-**The file.** The log is a single self-contained HTML page, `index.html` (and `reading-log.html`
-if that mirror exists in the project). Its entries live in a JavaScript array near the bottom of
-the file: `const DATA = [ … ];`. In Claude Chat / a Project this is the reading-log **artifact** in
-the conversation; in Claude Code it is the file on disk in the project. Append to that `DATA`
-array — do not rebuild the file.
+**The file.** The log is a single self-contained HTML page, `index.html`. Its entries live in a
+JavaScript array near the bottom of the file: `const DATA = [ … ];`. In Claude Chat / a Project
+this is the reading-log **artifact** in the conversation; in Claude Code it is the file on disk in
+the project. Append to that `DATA` array — do not rebuild the file.
 
 **The trigger.** Any confirmed entry in the normal course of using the skill — finishing a book
 ("I finished *The Telling*"), a bulk "log some books" import, "summarize this article: <url>", or
