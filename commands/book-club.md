@@ -8,8 +8,9 @@ description: >
   "book deep dive [title]" (structured analysis), "book blow my mind [title]" (hidden theories),
   "add to my reading log", "I've already read", "log some books", "build my reading history",
   "what should I read next" when reading history is in memory, "summarize this article: <url>" /
-  "log this article", "log our discussion" / "save this discussion", and "create my reading log" /
-  "set up my reading log" / "build my reading log page". DO NOT trigger:
+  "log this article", "log our discussion" / "save this discussion", "create my reading log" /
+  "set up my reading log" / "build my reading log page", and "import my reading log" / "sync my
+  reading log" / "keep my existing reading log" (upgrading or adopting an existing log). DO NOT trigger:
   "deep dive" or "blow my mind" without a book/author reference; general author research without
   reading intent; academic citation or bibliography tasks only.
 ---
@@ -603,6 +604,20 @@ Every confirmed entry is written to **both** memory **and** the Reading Log page
 — logging a book (or article, or discussion) *is* updating the log. Memory stays the durable
 source of truth; the HTML page is its visible view, and neither is written without the other.
 
+**Non-negotiable — update the artifact automatically, never ask, never defer:**
+- When an entry is confirmed, update the Reading Log **in the same turn**, as part of saving to
+  memory. Do **not** ask "want me to update/regenerate the log?" and do **not** wait for a separate
+  request. The write is automatic.
+- "Updating the log" means **editing the artifact/file in this conversation** (its `DATA` array).
+  It does **not** mean publishing or pushing anywhere.
+- Keep two actions strictly separate and never conflate them:
+  - **Updating the artifact** — automatic, every entry, in this conversation. Always happens.
+  - **Publishing to GitHub / GitHub Pages / a public link** — a *separate, optional, manual* step
+    the user takes when they want to share (see *Publishing and Sharing the Log*). Never describe
+    the automatic update as "pushing to GitHub," "regenerating on request," or "updating the
+    published page" — those are publishing concerns, not the per-entry update.
+- After updating, re-present the artifact so the user sees the new entry immediately.
+
 **The file.** The log is a single self-contained HTML page, `index.html`. Its entries live in a
 JavaScript array near the bottom of the file: `const DATA = [ … ];`. In Claude Chat / a Project
 this is the reading-log **artifact** in the conversation; in Claude Code it is the file on disk in
@@ -712,9 +727,39 @@ scratch using the build spec in *Creating the Reading Log*, then re-append every
 `book_club_log` memory — because memory holds the canonical record (the full `book_club_log`
 schema), the rendered page is always reproducible.
 
+### Upgrading or importing an existing log (do not lose entries)
+
+When a user already has a populated Reading Log — from an older version of this skill, another
+Project, or a downloaded `index.html` — treat their **existing data as the source of truth** and
+**never regenerate from a thinner memory**, which would drop fields. The risk is real: older
+versions stored a simpler memory schema, so a rebuild from memory alone can lose `year`, `link`,
+`summary`, `disciplines`, etc.
+
+Trigger this flow when the user provides an existing log file/artifact, says they're upgrading the
+skill, or asks to "import / keep my existing reading log," "sync my log," or similar.
+
+1. **Adopt the existing log as the working artifact.** If the user supplies an `index.html` (or it's
+   already the artifact in this conversation), keep it as-is and append future entries to its `DATA`
+   array — do **not** rebuild it from scratch.
+2. **Backfill memory from it.** Parse the existing `DATA` array and write every entry into
+   `book_club_log` memory using the full schema (every field present in the object), so memory
+   becomes a complete 1:1 mirror. This makes future regenerations lossless.
+3. **Reconcile, don't overwrite.** If both memory and the file have entries, merge by title+author:
+   keep the richer record for each, and never drop an entry that exists in either place. Report the
+   final count to the user.
+4. **Confirm the count.** Tell the user how many entries are now in the log and in memory, and that
+   they match — so they can see nothing was lost.
+
+Only fall back to building a fresh empty log (per *Creating the Reading Log*) when there is **no**
+existing log anywhere — not when one exists but memory looks incomplete.
+
 ---
 
 ## Publishing and Sharing the Log
+
+Publishing is a **separate, optional, manual** step — distinct from the automatic per-entry update
+in *Writing to the Reading Log File*. Logging an entry always updates the artifact in the
+conversation; it never publishes. Only publish when the user explicitly asks to share.
 
 The Reading Log opens as an **artifact** — a self-contained page in its own panel beside the chat.
 Each edit updates it in place as a new version. To share it:
