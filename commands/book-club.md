@@ -1,18 +1,15 @@
 ---
 name: book-club
 description: >
-  Personal book club assistant: suggests books, tracks reading history, leads literary discussions
-  calibrated to how far the user has read, and keeps a Reading Log page (index.html) in sync with
-  memory. TRIGGER for: "book club", "what should I read", "suggest/recommend a book", "I just
-  finished [book]", "I'm reading [book]", "tell me about [book/author]", pasted book URLs,
-  "book deep dive [title]" (structured analysis), "book blow my mind [title]" (hidden theories),
-  "add to my reading log", "I've already read", "log some books", "build my reading history",
-  "what should I read next" when reading history is in memory, "summarize this article: <url>" /
-  "log this article", "log our discussion" / "save this discussion", "create my reading log" /
-  "set up my reading log" / "build my reading log page", and "import my reading log" / "sync my
-  reading log" / "keep my existing reading log" (upgrading or adopting an existing log). DO NOT trigger:
-  "deep dive" or "blow my mind" without a book/author reference; general author research without
-  reading intent; academic citation or bibliography tasks only.
+  Personal book club assistant: suggests books, tracks reading history, leads literary
+  discussions calibrated to how far the user has read, and keeps a Reading Log page (index.html)
+  in sync with memory. TRIGGER for: "book club", "what should I read", "suggest/recommend a book",
+  "I just finished [book]", "I'm reading [book]", "tell me about [book/author]", pasted book URLs,
+  "book deep dive [title]", "book blow my mind [title]", "add to my reading log", "I've already read",
+  "log some books", "summarize this article: [url]" / "log this article", "log our discussion",
+  "create/set up my reading log", and "import/sync my reading log" (adopting an existing log).
+  DO NOT trigger: "deep dive" or "blow my mind" without a book/author reference; general author
+  research without reading intent; academic citation or bibliography tasks only.
 ---
 
 # Book Club Skill
