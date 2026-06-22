@@ -2,13 +2,15 @@
 name: book-club
 description: >
   Personal book club assistant: suggests books, tracks reading history, leads literary discussions
-  calibrated to how far the user has read. TRIGGER for: "book club", "what should I read",
-  "suggest/recommend a book", "I just finished [book]", "I'm reading [book]", "tell me about
-  [book/author]", pasted book URLs, "book deep dive [title]" (structured analysis),
-  "book blow my mind [title]" (hidden theories), "add to my reading log", "I've already read",
-  "log some books", "build my reading history", or "what should I read next" when reading history
-  is in memory. DO NOT trigger: "deep dive" or "blow my mind" without a book/author reference;
-  general author research without reading intent; academic citation or bibliography tasks only.
+  calibrated to how far the user has read, and keeps a Reading Log page (index.html) in sync with
+  memory. TRIGGER for: "book club", "what should I read", "suggest/recommend a book", "I just
+  finished [book]", "I'm reading [book]", "tell me about [book/author]", pasted book URLs,
+  "book deep dive [title]" (structured analysis), "book blow my mind [title]" (hidden theories),
+  "add to my reading log", "I've already read", "log some books", "build my reading history",
+  "what should I read next" when reading history is in memory, "summarize this article: <url>" /
+  "log this article", and "log our discussion" / "save this discussion". DO NOT trigger:
+  "deep dive" or "blow my mind" without a book/author reference; general author research without
+  reading intent; academic citation or bibliography tasks only.
 ---
 
 # Book Club Skill
@@ -70,6 +72,16 @@ Present the following in full:
 > - Typing titles freeform (one per line, or a paragraph — any format)
 > - Pasting a URL (Goodreads, publisher, library catalog, Wikipedia)
 > I'll confirm each book with you before saving, and log themes, impressions, and completion status.
+> I also log two other kinds of entry: **articles** (say "summarize this article: <url>" and I'll
+> read it and condense it) and **discussions** (say "log our discussion" to save a thread we've had).
+>
+> ---
+>
+> **📄 The Reading Log page**
+> Your history also lives in a single self-contained HTML page (`index.html`) — filterable by
+> type, author, theme, and discipline. Every entry I confirm is written to memory **and** appended
+> to that page in the same step, so logging a book *is* updating the log. See *Writing to the
+> Reading Log File* below.
 >
 > ---
 >
@@ -105,7 +117,7 @@ Present the following in full:
 > 4. 🤯 Blow my mind [title]
 > 5. 🗺️ Explore a theme or mood
 > 6. 📖 See my reading log
-> 7. ➕ Add books I've already read
+> 7. ➕ Log a read — a book, an article, or a discussion
 > 8. ⚙️ Settings
 
 ---
@@ -133,7 +145,7 @@ Use the answer to determine discussion mode (see below).
 > 4. 🤯 Blow my mind — lesser-known theories and surprising angles
 > 5. 🗺️ Explore a theme or mood
 > 6. 📖 See my reading log
-> 7. ➕ Add books I've already read
+> 7. ➕ Log a read — a book, an article, or a discussion
 > 8. ⚙️ Settings — language, verbosity, source controls
 
 ---
@@ -287,6 +299,57 @@ These can be folded into the confirmation table step for bulk imports to avoid a
 
 ---
 
+## Summarizing an Article
+
+Triggered by "summarize this article: <url>", "log this article", or pasting an article URL with
+intent to log it. Articles are a first-class log entry type (`type: "article"`).
+
+### Flow
+
+1. **Fetch the article** with `web_fetch` at the given URL and read the full text.
+   - **Substack caveat**: use the `[author].substack.com/p/[slug]` form, not the
+     `substack.com/@author/p-[id]` form, which can't be fetched directly.
+2. **Extract**: title, author, publication/source (e.g. Substack, Medium, the publication name),
+   and publication year.
+3. **Confirm** briefly before logging:
+
+> "Here's what I found:
+> - **Title**: [title]
+> - **Author**: [author]
+> - **Source / Year**: [source] · [year]
+>
+> Want me to log it with a short summary? (Say 'yes', or tell me anything to adjust.)"
+
+4. **Write the summary** from the article itself — condense the argument into 1–3 sentences,
+   keeping the key claims and any figures that matter. If the article is paywalled or only
+   partly readable, note that limitation in the summary so it's clear the recap reflects only
+   what could be accessed. Write it in the user's preferred language.
+5. **Log** to memory and append to the Reading Log file (see *Writing to the Reading Log File*),
+   with `status: "art"` and `link` set to the source URL.
+
+---
+
+## Logging a Discussion
+
+Triggered by "log our discussion", "save this discussion", or wrapping up a deep dive / blow my
+mind thread the user wants to keep. Discussions are a first-class log entry type
+(`type: "discussion"`).
+
+### Flow
+
+1. Identify what the discussion was **about**: a single book/author, or a cross-work theme.
+2. Build the entry fields:
+   - `author` → a short descriptor of the subject, e.g. `"on Le Guin"` or
+     `"cross-work: Pargin · Le Guin"`.
+   - `link` → the Open Library **work** page of the book the discussion is *about*
+     (see link resolution below); `linkLabel` → that book's title.
+   - `source` → `"Discussion"`; `status` → `"disc"`; no `year`.
+   - `summary` → 1–3 sentences capturing the thread's through-line.
+3. Confirm the descriptor and subject book with the user in one line, then log to memory and
+   append to the Reading Log file (see *Writing to the Reading Log File*).
+
+---
+
 ## Theme Exploration
 
 When the user wants to explore a theme or mood:
@@ -345,26 +408,152 @@ When a book or author is from a region not listed above, search: "[region/countr
 
 ## Memory Logging
 
-After any substantive book discussion or when the user confirms they've finished a book, update memory with:
+After any substantive book discussion, when the user confirms they've finished a book, or when an
+article or discussion is logged, update memory. Memory is the **canonical source of truth** — the
+Reading Log page (`index.html`) is a rendered view of it, so memory carries every field the page's
+`DATA` object needs, making the page losslessly reproducible from memory at any time.
 
 ```yaml
 book_club_log:
+  type: [book | article | discussion]
   title: [title]
-  author: [author]
-  completed: [yes/no/in-progress]
-  date_noted: [today's date]
-  themes: [list of 2–4 themes discussed or noted]
+  author: [author — person for books/articles; a descriptor like "on Le Guin" or
+           "cross-work: A · B" for discussions]
+  source: [publication for articles, e.g. Substack / Medium; "Discussion" for discussions;
+           omit for books]
+  year: [publication year for books/articles; omit for discussions]
+  completed: [yes/no/in-progress]                 # books
+  status: [done | next | art | disc]              # maps from type (see below)
+  date_noted: [today's date — becomes the entry's "added" date]
+  series: [e.g. "Hainish Cycle · 6", "Discworld · 1", or omit]
+  link: [Open Library work page for books/discussions; source URL for articles]
+  linkLabel: [discussions only — the subject book's title]
+  summary: [1–3 sentence description, in the user's preferred language]
+  disciplines: [zero or more from the fixed 14-term list below — only where clearly applicable]
+  themes: [2–4 free-text themes discussed or noted]
   user_response: [brief note on what resonated — drawn from conversation]
   rating_or_sentiment: [if user expressed one]
   awards: [any relevant awards noted]
   language_of_source: [if non-English source was used]
+  note: [optional callout — open threads, "up next" watch-list — or omit]
 ```
+
+**Status mapping**: book finished → `done`; book queued/up-next → `next`; article → `art`;
+discussion → `disc`.
+
+**Controlled discipline vocabulary** (closed list of 14 — use these terms verbatim, never invent
+new ones; `themes` are free-text by contrast):
+
+> macro economics · micro economics · sociology · anthropology · engineering · statistics ·
+> finance · marketing · accounting · physics · chemistry · computer science ·
+> software engineering · communication
 
 Also log:
 - `book_club_language_preference`: user's preferred language for sources
 - `book_club_theme_interests`: running list of themes the user has gravitated toward
 
 Use the reading log to proactively personalize future recommendations without being prompted.
+
+---
+
+## Writing to the Reading Log File
+
+Every confirmed entry is written to **both** memory **and** the Reading Log page in the same turn
+— logging a book (or article, or discussion) *is* updating the log. Memory stays the durable
+source of truth; the HTML page is its visible view, and neither is written without the other.
+
+**The file.** The log is a single self-contained HTML page, `index.html` (and `reading-log.html`
+if that mirror exists in the project). Its entries live in a JavaScript array near the bottom of
+the file: `const DATA = [ … ];`. In Claude Chat / a Project this is the reading-log **artifact** in
+the conversation; in Claude Code it is the file on disk in the project. Append to that `DATA`
+array — do not rebuild the file.
+
+**The trigger.** Any confirmed entry in the normal course of using the skill — finishing a book
+("I finished *The Telling*"), a bulk "log some books" import, "summarize this article: <url>", or
+"log our discussion" — is the cue. As part of the same turn, write the entry to memory **and**
+into the log file, then re-present the page. There is no separate "update the reading log" command.
+
+### What to do on each new entry
+
+1. **Confirm the entry** with the user (title, author, finished vs. in-progress / which book a
+   discussion is about) — as the entry flows above already do.
+2. **Write it to memory** using the `book_club_log` schema (see *Memory Logging*).
+3. **Append a matching object to the `DATA` array**, placed with its own type group, using the
+   field rules below.
+4. **Update the "Last updated" line** near the top of the page to today's date.
+5. **Verify before showing the file**: re-run `node --check` on the page's script and confirm the
+   entry count rose by the expected amount, so a malformed object can't silently break the page.
+6. **Re-present the file** so the user sees the refreshed log immediately.
+
+### `DATA` object schema and field rules
+
+Each entry is one object. Fields (optional ones marked `?`):
+
+| Field | Rule |
+|---|---|
+| `type` | `"book"` / `"article"` / `"discussion"` — drives color, grouping, status chip |
+| `title` | Display title |
+| `author` | Person (books/articles), or a descriptor like `"on Le Guin"` / `"cross-work: A · B"` (discussions) |
+| `source?` | Publication (articles) or `"Discussion"` (discussions); omit for books |
+| `year?` | Publication year (books/articles); omit for discussions |
+| `added` | Today's date, ISO `YYYY-MM-DD` |
+| `status` | `"done"`/`"next"` (books), `"art"` (articles), `"disc"` (discussions) |
+| `series?` | e.g. `"Hainish Cycle · 6"`, `"Discworld · 1"`; omit if none |
+| `link` | Open Library work page (books + discussions) or article URL |
+| `linkLabel?` | Discussions only — the subject book's title |
+| `summary` | 1–3 sentences |
+| `disciplines` | Array drawn **only** from the fixed 14-term list (see *Memory Logging*) |
+| `themes` | 2–4 free-text tags |
+| `note?` | Optional callout (open thread, "up next"); omit if none |
+
+**Link resolution.**
+- **Books and discussions** link to Open Library *work* pages: query the Open Library
+  `search.json` API by title + author and take the work key (`/works/OL…W`). Discussions point at
+  the work they're *about* and set `linkLabel` to that book's title.
+- **Articles** link to their own source URL (Substack caveat: use
+  `[author].substack.com/p/[slug]`, not the `substack.com/@author/p-[id]` form).
+
+**Summaries** (the `summary` field is short — 1–3 sentences — but reached differently by type):
+- **Books**: a condensed, spoiler-light framing of the book's premise and central themes, drawn
+  from known details + anything surfaced in the discussion (Open Library, reviews, award context).
+  It is *not* produced by reading the full book.
+- **Articles**: built from the article itself — `web_fetch` the URL, read the full text, condense,
+  keeping key claims and figures; note any paywall limitation.
+- Always written in the user's preferred language and trimmed to the essentials.
+
+### Lifecycle of a new entry
+
+```
+You: "I finished The Telling."          <- a book
+ or  "Summarize this article: <url>"    <- an article
+ or  "Log our discussion."              <- a discussion
+        |
+        v
+Skill confirms title / author / status (or which book a discussion is about)
+        |
+        v
+Builds the entry object:
+   - link     -> Open Library work page (book/discussion)  /  source URL (article)
+   - summary  -> book:    condense from known details + the discussion
+                 article: fetch the URL, read the full text, condense
+   - tags     -> themes (free) + disciplines (from the fixed 14-term list)
+   - status + "added" date
+        |
+        v
+Writes to memory  -->  Appends the object to DATA[] in index.html
+        |                          |
+        +-------------+------------+
+                      v
+        node --check + entry-count verification + "Last updated" bumped
+                      v
+        Re-presents the updated Reading Log
+```
+
+### Repair path
+
+If the HTML file is ever lost or drifts out of sync with memory, regenerate the whole log from
+memory from scratch — because memory holds the canonical record (the full `book_club_log` schema),
+the rendered page is always reproducible.
 
 ---
 
