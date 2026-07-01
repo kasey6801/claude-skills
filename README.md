@@ -13,6 +13,7 @@ A collection of reusable skills and slash commands for [Claude](https://claude.a
 | [`/book-club`](#book-club) | Personal book club assistant — recommendations, discussions, reading log |
 | [`career-positioning-studio`](#career-positioning-studio) | Generate a four-part career package — LinkedIn update plan, ATS-safe CV, professional development plan, and 10 target-role recommendations |
 | [`/new-project`](#new-project) | Set up a new software project, manage a prioritised backlog, or run a QC audit |
+| [`/interaction-log`](#interaction-log) | Maintain a self-contained HTML log of your Claude Code work sessions, grouped by folder and date |
 
 ---
 
@@ -55,7 +56,7 @@ Either way the skill ends up at `.claude/skills/<skill-name>/SKILL.md`. Replace 
 
 ### Installing a command
 
-Commands in this repo: `capture-prompt`, `book-club`, `new-project`.
+Commands in this repo: `capture-prompt`, `book-club`, `new-project`, `interaction-log`.
 
 Download the single `.md` file straight into a commands directory:
 
@@ -443,4 +444,57 @@ On first run the skill fetches the PMI CCR handbook from two official sources an
 4. Broader web search across recognized PM sources
 
 If all four attempts fail, the skill proceeds with stored or built-in defaults and tells you the date of the last successful fetch.
+
+---
+
+## `/interaction-log`
+
+Maintain a single self-contained `Interaction-Log.html` at your workspace root: a browsable, offline record of your Claude Code work sessions. Each run appends one entry for the session (the folder that changed most, every prompt you sent verbatim, and a summary of what changed), grouped into collapsible folder blocks with the newest activity on top. The log is one HTML file with no server, database, or external dependencies, and the command creates it from a built-in template on first run.
+
+### Installation
+
+**Global install** (available in every Claude Code project on this machine):
+
+```bash
+mkdir -p ~/.claude/commands
+curl -o ~/.claude/commands/interaction-log.md \
+  https://raw.githubusercontent.com/kasey6801/claude-skills/main/commands/interaction-log.md
+```
+
+**Project-level install** (available only in the current project):
+
+```bash
+mkdir -p .claude/commands
+curl -o .claude/commands/interaction-log.md \
+  https://raw.githubusercontent.com/kasey6801/claude-skills/main/commands/interaction-log.md
+```
+
+### Usage
+
+At the end of a work session, type:
+
+```
+/interaction-log
+```
+
+Add an optional note that gets folded into the change summary:
+
+```
+/interaction-log shipped the v2 release
+```
+
+### What it captures
+
+| Field | Description |
+|---|---|
+| Date | Today's date as `YYYY-MM-DD`, checked live |
+| Primary folder | The most-changed folder this session, as a path relative to your workspace root |
+| Prompts | Every prompt you sent this session, verbatim and in order |
+| Summary of changes | A concise bullet list of files created or edited, commits or pushes, and other folders touched |
+
+### How it works
+
+- The log lives at `Interaction-Log.html` at your workspace root, the top-level folder you run Claude Code from. On first run the command creates it from a built-in template (warm "field guide" styling, light and dark themes, expand and collapse controls).
+- Entries are grouped by folder, then by date, newest first. Re-logging the same folder on the same day appends to that day's entry, a new day prepends a new dated section, and a new folder is inserted at the top.
+- Everything stays local and self-contained. The command does not commit or push; version control is left to you.
 
